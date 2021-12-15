@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using MinimalAPIProjectWith.Net6.Models;
 using MinimalAPIProjectWith.Net6.Services;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -35,6 +37,9 @@ app.UseAuthentication();
 
 app.MapGet("/", () => "Hello World!");
 
+app.MapPost("/login",
+    (UserLogin user, IUserService service) => Login(user, service));
+
 app.MapPost("/create",
     (Job job, IJobService service) => CreateJob(job, service));
 
@@ -49,6 +54,43 @@ app.MapPut("/edit",
 
 app.MapDelete("/delete",
     (int id, IJobService service) => DeleteJobById(id, service));
+
+IResult Login(UserLogin user, IUserService service)
+{
+    if(!string.IsNullOrEmpty(user.UserName) &&
+        !string.IsNullOrEmpty(user.Password))
+    {
+        var loggedInUser = service.Get(user);
+        if (loggedInUser is null) return Results.NotFound("User not found");
+
+        var claims = new[]
+        {
+            new Claim(ClaimTypes.NameIdentifier, loggedInUser.UserName),
+            new Claim(ClaimTypes.Email, loggedInUser.Email),
+            new Claim(ClaimTypes.GivenName, loggedInUser.FirstName),
+            new Claim(ClaimTypes.Surname, loggedInUser.LastName),
+            new Claim(ClaimTypes.Role, loggedInUser.Role)
+        };
+
+        var token = new JwtSecurityToken(
+            issuer: builder.Configuration["Jwt:Issuer"],
+            audience: builder.Configuration["Jwt:Audience"],
+            claims: claims,
+            expires: DateTime.UtcNow.AddDays(60),
+            notBefore: DateTime.UtcNow,
+            signingCredentials: new SigningCredentials(
+                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])),
+                SecurityAlgorithms.HmacSha256
+            )
+        );
+
+        var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
+
+        return Results.Ok(tokenString);
+    }
+
+    return Results.BadRequest("one field must be empty");
+}
 
 IResult CreateJob(Job job, IJobService service)
 {
