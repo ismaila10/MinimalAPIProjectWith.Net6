@@ -7,4 +7,5 @@ global using MinimalAPIProjectWith.Net6.Services;
 global using System.IdentityModel.Tokens.Jwt;
 global using System.Security.Claims;
 global using System.Text;
+global using Microsoft.OpenApi.Models;
 
