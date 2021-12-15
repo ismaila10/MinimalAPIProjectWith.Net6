@@ -52,14 +52,19 @@ app.UseSwagger();
 app.UseAuthorization();
 app.UseAuthentication();
 
-app.MapGet("/", () => "Hello World!");
+app.MapGet("/", () => "Hello World!")
+    .ExcludeFromDescription();
 
 app.MapPost("/login",
-    (UserLogin user, IUserService service) => Login(user, service));
+    (UserLogin user, IUserService service) => Login(user, service))
+    .Accepts<UserLogin>("application/json")
+    .Produces<string>();
 
 app.MapPost("/create",
      [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Administrator")]
-(Job job, IJobService service) => CreateJob(job, service));
+(Job job, IJobService service) => CreateJob(job, service))
+    .Accepts<Job>("application/json")
+    .Produces<Job>(statusCode: 200, contentType: "application/json");
 
 app.MapGet("/get",
      [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Standard, Administrator")]
