@@ -3,11 +3,15 @@ using MinimalAPIProjectWith.Net6.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddSwaggerGen();
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSingleton<IUserService, UserService>();
 builder.Services.AddSingleton<IJobService, JobService>();
 
 var app = builder.Build();
+
+app.UseSwagger();
 
 app.MapGet("/", () => "Hello World!");
 
@@ -58,5 +62,7 @@ IResult DeleteJobById(int id, IJobService service)
 
     return Results.Ok(result);
 }
+
+app.UseSwaggerUI();
 
 app.Run();
