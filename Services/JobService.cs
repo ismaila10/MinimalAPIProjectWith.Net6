@@ -1,7 +1,4 @@
-﻿using MinimalAPIProjectWith.Net6.Models;
-using MinimalAPIProjectWith.Net6.Repositories;
-
-namespace MinimalAPIProjectWith.Net6.Services
+﻿namespace MinimalAPIProjectWith.Net6.Services
 {
     public class JobService : IJobService
     {

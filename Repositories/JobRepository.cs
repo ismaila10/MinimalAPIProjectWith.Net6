@@ -1,6 +1,4 @@
-﻿using MinimalAPIProjectWith.Net6.Models;
-
-namespace MinimalAPIProjectWith.Net6.Repositories
+﻿namespace MinimalAPIProjectWith.Net6.Repositories
 {
     public class JobRepository
     {

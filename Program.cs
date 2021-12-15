@@ -1,11 +1,3 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using MinimalAPIProjectWith.Net6.Models;
-using MinimalAPIProjectWith.Net6.Services;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddSwaggerGen();
@@ -41,22 +33,28 @@ app.MapPost("/login",
     (UserLogin user, IUserService service) => Login(user, service));
 
 app.MapPost("/create",
-    (Job job, IJobService service) => CreateJob(job, service));
+     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Administrator")]
+(Job job, IJobService service) => CreateJob(job, service));
 
 app.MapGet("/get",
-    (int id, IJobService service) => GetJobById(id, service));
+     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Standard, Administrator")]
+(int id, IJobService service) => GetJobById(id, service));
 
 app.MapGet("/list",
-    (IJobService service) => GetJobs(service));
+     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+(IJobService service) => GetJobs(service));
 
 app.MapPut("/edit",
-    (Job job, IJobService service) => UpdateJob(job, service));
+     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Administrator")]
+(Job job, IJobService service) => UpdateJob(job, service));
 
 app.MapDelete("/delete",
-    (int id, IJobService service) => DeleteJobById(id, service));
+     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Administrator")]
+(int id, IJobService service) => DeleteJobById(id, service));
 
 IResult Login(UserLogin user, IUserService service)
 {
+    if (user == null) return Results.BadRequest("No Parameters");
     if(!string.IsNullOrEmpty(user.UserName) &&
         !string.IsNullOrEmpty(user.Password))
     {
